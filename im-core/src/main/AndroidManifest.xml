@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM"
+        tools:ignore="ExactAlarm" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <application>
+        <service android:name=".FrogServiceNative"
+            android:enabled="true"
+            android:exported="false"
+            android:process=":push">
+            <intent-filter>
+                <action android:name="com.zjkj.im_core.action.FrogServiceNative"/>
+            </intent-filter>
+        </service>
+        <receiver
+            android:name=".TransceiverReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:process=":push">
+            <intent-filter>
+                <!-- 接收设备启动完成广播 -->
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <!-- 接收电量低广播 -->
+                <action android:name="android.intent.action.BATTERY_OKAY"/>
+                <action android:name="android.intent.action.BATTERY_LOW"/>
+                <!-- 接收日期变化广播 -->
+                <action android:name="android.intent.action.DATE_CHANGED" />
+                <!-- 应用安装、卸载和更新广播 -->
+                <action android:name="android.intent.action.PACKAGE_ADDED" />
+                <action android:name="android.intent.action.PACKAGE_REMOVED" />
+                <!--                应用更新-->
+                <action android:name="android.intent.action.PACKAGE_REPLACED" />
+                <!--                设备快速启动-->
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <!--                插拔充电器时-->
+                <action android:name="android.intent.action.ACTION_POWER_CONNECTED"/>
+                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED"/>
+                <!--                设置时间-->
+                <action android:name="android.intent.action.TIME_SET"/>
+                <!--                自定义事件-->
+                <action android:name="com.zjkj.im_core.action.TRANSCEIVER_RECEIVER"/>
+                <action android:name="com.zjkj.im_core.action.BACKGROUND_STATUS_RECOVERY"/>
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".HeartbeatAlarmTimeoutScheduler$AlarmTimeoutBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:process=":push"
+            android:permission="com.android.alarm.permission.SET_ALARM">
+            <intent-filter>
+                <action android:name="com.zjkj.im_core.action.HEARTBEAT_ALARM_TIMEOUT_ACTION"/>
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".AutoConnectAlarmTimeoutScheduler$AlarmTimeoutBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:process=":push"
+            android:permission="com.android.alarm.permission.SET_ALARM">
+            <intent-filter>
+                <action android:name="com.zjkj.im_core.action.AUTO_CONNECT_ALARM_TIMEOUT_ACTION"/>
+            </intent-filter>
+        </receiver>
+
+        <!--        ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓Work初始化↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓ -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:exported="false"
+            android:process=":push"
+            tools:node="remove"
+            android:authorities="${applicationId}.androidx-startup"/>
+        <service
+            android:name="androidx.work.impl.background.systemalarm.SystemAlarmService"
+            tools:node="merge"
+            android:process=":push"/>
+
+        <service
+            android:name="androidx.work.impl.background.systemjob.SystemJobService"
+            tools:node="merge"
+            android:process=":push"/>
+
+        <service
+            android:name="androidx.work.impl.foreground.SystemForegroundService"
+            tools:node="merge"
+            android:process=":push"/>
+        <receiver
+            android:name="androidx.work.impl.utils.ForceStopRunnable$BroadcastReceiver"
+            tools:node="merge"
+            android:process=":push"/>
+        <receiver
+            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryChargingProxy"
+            tools:node="merge"
+            android:process=":push"/>
+        <receiver
+            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryNotLowProxy"
+            tools:node="merge"
+            android:process=":push"/>
+        <receiver
+            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$StorageNotLowProxy"
+            tools:node="merge"
+            android:process=":push"/>
+        <receiver
+            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$NetworkStateProxy"
+            tools:node="merge"
+            android:process=":push"/>
+        <receiver
+            android:name="androidx.work.impl.background.systemalarm.RescheduleReceiver"
+            tools:node="merge"
+            android:process=":push"/>
+        <receiver
+            android:name="androidx.work.impl.background.systemalarm.ConstraintProxyUpdateReceiver"
+            tools:node="merge"
+            android:process=":push"/>
+        <receiver
+            android:name="androidx.work.impl.diagnostics.DiagnosticsReceiver"
+            tools:node="merge"
+            android:process=":push"/>
+        <!--        <service-->
+        <!--                android:name="androidx.room.MultiInstanceInvalidationService"-->
+        <!--                android:exported="false"/>-->
+        <!--        <receiver-->
+        <!--                android:name="androidx.profileinstaller.ProfileInstallReceiver"-->
+        <!--                android:exported="false"/>-->
+<!--        ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑Work初始化↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑ -->
+    </application>
+</manifest>
