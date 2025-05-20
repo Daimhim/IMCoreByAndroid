@@ -10,8 +10,8 @@ android {
 
     defaultConfig {
         applicationId = "com.example.imcore"
-        minSdk = 24
-        targetSdk = 35
+        minSdk = 22
+        targetSdk = 30
         versionCode = 1
         versionName = "1.0"
 
