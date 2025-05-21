@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.zjkj.im_core"
-    compileSdk = 35
+    compileSdk = 33
 
     defaultConfig {
         minSdk = 22
