@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.example.imcore"
-    compileSdk = 33
+    compileSdk = 31
 
     defaultConfig {
         applicationId = "com.example.imcore"
