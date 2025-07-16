@@ -1,6 +1,9 @@
+import shadow.bundletool.com.android.tools.r8.internal.pU
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    id("maven-publish")
 }
 
 android {
@@ -13,6 +16,8 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+
+        manifestPlaceholders["processName"] = ":push"
     }
 
     buildTypes {
@@ -36,6 +41,8 @@ android {
     }
 }
 
+group = "com.github.Daimhim"
+version = "1.0.4.1"
 dependencies {
 
 //    implementation(libs.androidx.core.ktx)
@@ -54,4 +61,18 @@ dependencies {
     compileOnly("com.github.kongqw:NetworkMonitor:1.2.0")
 
     implementation(libs.androidx.work.runtime)
+}
+
+publishing {
+    publications {
+        register<MavenPublication>("release") {
+            groupId = "com.github.Daimhim"
+            artifactId = "IMCoreByAndroid"
+            version = "1.0.4.1"
+
+            afterEvaluate {
+                from(components["release"])
+            }
+        }
+    }
 }

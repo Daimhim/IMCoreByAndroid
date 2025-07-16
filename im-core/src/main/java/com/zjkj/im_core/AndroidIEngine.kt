@@ -9,6 +9,8 @@ import android.util.ArrayMap
 import org.daimhim.container.ContextHelper
 import org.daimhim.imc_core.*
 import timber.multiplatform.log.Timber
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 val IEngineState.ENGINE_SERVICE_NOT_CONNECTED: Int
     get() {
@@ -16,6 +18,7 @@ val IEngineState.ENGINE_SERVICE_NOT_CONNECTED: Int
     }
 
 class AndroidIEngine : IEngine {
+    private val executor = Executors.newSingleThreadExecutor()
     private val aWait = Object()
 
     override fun engineOff() {
@@ -26,10 +29,9 @@ class AndroidIEngine : IEngine {
     }
 
     override fun engineOn(key: String) {
-        Thread(Runnable {
+        executor.submit {
             connect()?.engineOn(key)
-        })
-            .start()
+        }
     }
 
     override fun engineState(): Int {
@@ -37,24 +39,23 @@ class AndroidIEngine : IEngine {
     }
 
     override fun makeConnection() {
-        Thread(Runnable {
-            connect()?.makeConnection()
-        })
-            .start()
+        executor.submit {
+            connect()!!.makeConnection()
+            Timber.i("makeConnection")
+        }
     }
 
     override fun onChangeMode(mode: Int) {
-        Thread(Runnable {
-            connect()?.onChangeMode(mode)
-        })
-            .start()
+        executor.submit {
+            connect()!!.onChangeMode(mode)
+            Timber.i("onChangeMode $mode")
+        }
     }
 
     override fun onNetworkChange(networkState: Int) {
-        Thread(Runnable {
+        executor.submit {
             connect()?.onNetworkChange(networkState)
-        })
-            .start()
+        }
     }
 
     /**
@@ -161,7 +162,7 @@ class AndroidIEngine : IEngine {
      */
     private val newImcSocketListeners = ArrayMap<Int,ArrayList<V2IMCSocketListener>>()
     private var level :Int = Int.MAX_VALUE
-    private val proxySocketRemoteV2IMCListener = object : RemoteV2IMCListener.Stub() {
+    private val proxySocketRemoteV2IMCListener = object :RemoteV2IMCListener {
         override fun onMessageByte(
             md5: String?,
             index: Int,
@@ -201,7 +202,13 @@ class AndroidIEngine : IEngine {
             }
             return isSuccess
         }
+
+        override fun asBinder(): IBinder? {
+            return null
+        }
+
     }
+
     override fun addIMCSocketListener(level: Int, imcSocketListener: V2IMCSocketListener) {
         val list = newImcSocketListeners[level]?:ArrayList()
         list.add(imcSocketListener)
@@ -304,7 +311,9 @@ class AndroidIEngine : IEngine {
     }
 
     fun preBindingService(){
-        Thread(Runnable { connect() }).start()
+        executor.submit {
+            connect()
+        }
     }
     fun disConnectService(){
         Timber.i("disConnectService $isServiceBound")

@@ -63,17 +63,18 @@ class FrogServiceNative : Service() {
 
         override fun engineOn(key: String?) {
             Timber.i("frogServiceIBinder $key")
+            IMSPUtils
+                .getInstance()
+                .put("${bindId}_${ConfigureConstants.SERVER_ADDRESS}",key?:"")
             FSNConfig
                 .getIEngine()
                 .engineOn(key ?: throw RemoteException("key 不可为空"))
-            IMSPUtils
-                .getInstance()
-                .put("${bindId}_${ConfigureConstants.SERVER_ADDRESS}",key)
             IMSPUtils.getInstance().put(ConfigureConstants.BIND_ID,bindId)
             RegularInspectionConnectWorker.start(ContextHelper.getApplication())
         }
 
         override fun engineOff() {
+            pingBinder()
             FSNConfig
                 .getIEngine()
                 .engineOff()

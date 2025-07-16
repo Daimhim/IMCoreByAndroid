@@ -10,7 +10,7 @@ import timber.multiplatform.log.Timber
 class RegularInspectionConnectWorker(private val context: Context, private val workerParams: WorkerParameters) : Worker(context, workerParams) {
     companion object{
         private const val REGULAR_INSPECTION_CONNECT_TAG = "REGULAR_INSPECTION_CONNECT_TAG"
-        private var startOrNot = false
+        var startOrNot = false
         @Synchronized
         fun start(context: Context){
             if (startOrNot){
@@ -35,31 +35,10 @@ class RegularInspectionConnectWorker(private val context: Context, private val w
     }
 
     override fun doWork(): Result {
-        Timber.i("doWork")
+        Timber.i("IMC RegularInspectionConnectWorker doWork startOrNot${startOrNot}")
         // 接收到广播，说明子进程已经启动
         try {
-            // 获取绑定ID
-            val bindId = IMSPUtils.getInstance().get(ConfigureConstants.BIND_ID, "")
-            if (bindId.isNullOrEmpty()){
-                return Result.success()
-            }
-            val serverAddress = IMSPUtils.getInstance()
-                .get("${bindId}_${ConfigureConstants.SERVER_ADDRESS}", "")
-            // 获取服务地址
-            if (serverAddress.isNullOrEmpty()){
-                return Result.success()
-            }
-            val iEngine = FSNConfig
-                .getIEngine()
-            if (iEngine.engineState() == IEngineState.ENGINE_OPEN
-                || iEngine.engineState() == IEngineState.ENGINE_FAILED
-                || iEngine.engineState() == IEngineState.ENGINE_CONNECTING){
-                iEngine.makeConnection()
-                return Result.success()
-            }
-            Timber.i("serverAddress $serverAddress")
-            iEngine
-                .engineOn(serverAddress)
+            CentralizedProcessingCenter.start(context)
         }catch (e:Exception){
             e.printStackTrace()
         }

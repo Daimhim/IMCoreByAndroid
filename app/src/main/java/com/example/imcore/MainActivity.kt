@@ -30,16 +30,15 @@ import timber.multiplatform.log.Timber
 
 class MainActivity : Activity() {
     companion object{
-        val iEngine: IEngine = AndroidIEngine()
 
-        const val SMART_HEARTBEAT = 1
-        const val FIXED_HEARTBEAT = 0
+        const val SMART_HEARTBEAT = 0
+        const val FIXED_HEARTBEAT = 1
 
         const val DELAYED_SWITCHING_SMART_HEARTBEAT = "DELAYED_SWITCHING_SMART_HEARTBEAT"
 
-        const val DELAY_SWITCHING_TIME = 30 * 1000L
+        const val DELAY_SWITCHING_TIME = 20 * 1000L
     }
-    var baseUrl = "https://8f1f-117-22-144-152.ngrok-free.app"
+    var baseUrl = "wss://echo.websocket.org"
     private val rapidResponseForceV2 = RapidResponseForceV2()
 
     private lateinit var et_base_url : EditText
@@ -48,6 +47,7 @@ class MainActivity : Activity() {
     private lateinit var tv_state : TextView
     private var heartbeatMode: Int = 0
     private val mainAdapter = MainAdapter()
+    val iEngine: IEngine = AndroidIEngine()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,7 +70,7 @@ class MainActivity : Activity() {
 
         val lv_list = findViewById<ListView>(R.id.lv_list)
         lv_list.adapter = mainAdapter
-
+        iEngine.onChangeMode(if (FullLifecycleHandler.isForeground()) FIXED_HEARTBEAT else SMART_HEARTBEAT)
     }
 
     private fun initListener() {
@@ -95,7 +95,7 @@ class MainActivity : Activity() {
                 }
                 Thread(kotlinx.coroutines.Runnable {
                     try {
-                        Timber.i("FrogServiceNative ${MainActivity.iEngine.engineState()}")
+                        Timber.i("FrogServiceNative ${iEngine.engineState()}")
                         if (bt_action.isChecked){
                             iEngine.engineOn(url)
                         }else{
@@ -120,7 +120,7 @@ class MainActivity : Activity() {
                     val name = Thread.currentThread().name
                     runOnUiThread {
                         bt_action.isChecked = false
-                        tv_state.text = "connectionClosed ${name}"
+                        tv_state.text = "connectionClosed 已关闭${name}"
                     }
                 }
 
@@ -128,7 +128,7 @@ class MainActivity : Activity() {
                     val name = Thread.currentThread().name
                     runOnUiThread {
                         bt_action.isChecked = true
-                        tv_state.text = "connectionLost ${name}"
+                        tv_state.text = "connectionLost 连接中${name}"
                     }
                 }
 
@@ -136,7 +136,7 @@ class MainActivity : Activity() {
                     val name = Thread.currentThread().name
                     runOnUiThread {
                         bt_action.isChecked = true
-                        tv_state.text = "connectionSucceeded ${name}"
+                        tv_state.text = "connectionSucceeded 连接成功${name}"
                     }
                 }
 

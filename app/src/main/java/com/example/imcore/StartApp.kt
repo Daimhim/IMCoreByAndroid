@@ -14,6 +14,7 @@ import org.daimhim.imc_core.ProgressiveAutoConnect
 import org.daimhim.imc_core.RRFTimeoutScheduler
 import org.daimhim.imc_core.TimberIMCLog
 import org.daimhim.imc_core.V2FixedHeartbeat
+import org.daimhim.imc_core.V2IMCListener
 import org.daimhim.imc_core.V2JavaWebEngine
 import org.daimhim.imc_core.V2SmartHeartbeat
 import timber.multiplatform.log.DebugTree
@@ -27,7 +28,7 @@ class StartApp : Application() {
         Timber.plant(DebugTree())
         if (ContextHelper.isMainProcess()){
             // 主进程
-            registerActivityLifecycleCallbacks(FullLifecycleHandler())
+            FullLifecycleHandler.init(this)
             NetworkMonitorManager.getInstance().init(this)
 //            TransceiverReceiver.sendTransceiverReceiver(this)
             return
@@ -66,5 +67,16 @@ class StartApp : Application() {
                         .build()
                 )
                 .build())
+        Timber.i("TransceiverReceiver IMC StartApp onCreate")
+        TransceiverReceiver.sendRevivalBroadcast()
+        FSNConfig.getIEngine()
+            .addIMCListener(object : V2IMCListener {
+                override fun onMessage(text: String) {
+                    super.onMessage(text)
+                    Timber.i("onMessage $text")
+                }
+            })
     }
+
+
 }
