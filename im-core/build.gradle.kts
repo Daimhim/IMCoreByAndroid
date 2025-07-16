@@ -8,11 +8,11 @@ plugins {
 
 android {
     namespace = "com.zjkj.im_core"
-    compileSdk = 31
+    compileSdk = 33
 
     defaultConfig {
         minSdk = 22
-        targetSdk = 30
+        targetSdk = 33
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
